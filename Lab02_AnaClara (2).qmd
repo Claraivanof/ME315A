@@ -1,0 +1,140 @@
+---
+title: "Laboratório 02 - Processamento de Bases de Dados em Lote"
+author: "Ana Clara Ivanof de Oliveira"
+format:
+  pdf:
+    toc: false
+    number-sections: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# 1. Estatísticas suficientes
+
+Para calcular o percentual de voos com `ARRIVAL_DELAY > 10`, para cada combinação de dia, mês e companhia aérea, são suficientes duas informações: o número total de voos válidos e o número de voos com atraso superior a 10 minutos. O percentual final é obtido por `atrasos / total`.
+
+# 2. Função getStats
+
+```{r}
+library(dplyr)
+library(readr)
+
+getStats <- function(input, pos) {
+  input %>%
+    filter(AIRLINE %in% c("AA", "DL", "UA", "US")) %>%
+    filter(
+      !is.na(AIRLINE),
+      !is.na(MONTH),
+      !is.na(DAY),
+      !is.na(ARRIVAL_DELAY)
+    ) %>%
+    group_by(AIRLINE, MONTH, DAY) %>%
+    summarise(
+      total = n(),
+      atrasos = sum(ARRIVAL_DELAY > 10),
+      .groups = "drop"
+    )
+}
+```
+
+# 3. Leitura em lotes
+
+O arquivo é lido em lotes de 100.000 registros. Apenas as quatro colunas necessárias para a atividade são importadas.
+
+```{r}
+colunas <- cols_only(
+  AIRLINE = col_character(),
+  MONTH = col_integer(),
+  DAY = col_integer(),
+  ARRIVAL_DELAY = col_double()
+)
+
+lotes <- read_csv_chunked(
+  file = file.path("..", "dados", "flights.csv.zip"),
+  callback = DataFrameCallback$new(getStats),
+  chunk_size = 100000,
+  col_types = colunas
+)
+```
+
+# 4. Função computeStats
+
+```{r}
+computeStats <- function(stats) {
+  stats %>%
+    group_by(AIRLINE, MONTH, DAY) %>%
+    summarise(
+      total = sum(total),
+      atrasos = sum(atrasos),
+      .groups = "drop"
+    ) %>%
+    mutate(
+      Cia = AIRLINE,
+      Data = as.Date(
+        paste(2015, MONTH, DAY, sep = "-")
+      ),
+      Perc = atrasos / total
+    ) %>%
+    select(Cia, Data, Perc)
+}
+
+stats <- computeStats(bind_rows(lotes))
+stats
+```
+
+# 5. Calendários
+
+```{r}
+library(ggplot2)
+library(ggcal)
+
+pal <- scale_fill_gradient(
+  low = "#4575b4",
+  high = "#d73027"
+)
+
+baseCalendario <- function(stats, cia) {
+  dados <- stats %>%
+    filter(Cia == cia)
+
+  ggcal(dados$Data, dados$Perc)
+}
+
+cAA <- baseCalendario(stats, "AA")
+cDL <- baseCalendario(stats, "DL")
+cUA <- baseCalendario(stats, "UA")
+cUS <- baseCalendario(stats, "US")
+```
+
+## American Airlines — AA
+
+```{r}
+cAA + pal + ggtitle("Percentual de atrasos - AA")
+```
+
+## Delta Air Lines — DL
+
+```{r}
+cDL + pal + ggtitle("Percentual de atrasos - DL")
+```
+
+## United Airlines — UA
+
+```{r}
+cUA + pal + ggtitle("Percentual de atrasos - UA")
+```
+
+## US Airways — US
+
+```{r}
+cUS + pal + ggtitle("Percentual de atrasos - US")
+```
+
+# Horário de compilação
+
+```{r}
+Sys.setenv(TZ = "America/Sao_Paulo")
+Sys.time()
+```
