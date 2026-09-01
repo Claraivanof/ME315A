@@ -1,0 +1,123 @@
+---
+title: "Lista 03 - DISTINCT, AND, OR e NOT"
+author: "Ana Clara Ivanof de Oliveira"
+format: pdf
+---
+
+# Hands-On
+
+## 1. STATE e FEE sem duplicados
+
+```sql
+SELECT DISTINCT STATE, FEE FROM PRESERVE;
+```
+
+## 2. DNO sem duplicados
+
+```sql
+SELECT DISTINCT DNO FROM EMPLOYEE;
+```
+
+## 3. Comparação das consultas
+
+```sql
+SELECT DNO, SALARY FROM EMPLOYEE;
+SELECT DISTINCT DNO, SALARY FROM EMPLOYEE;
+SELECT DISTINCT DNO, SALARY FROM EMPLOYEE ORDER BY DNO, SALARY;
+```
+
+A primeira pode apresentar linhas repetidas. `DISTINCT` elimina duplicatas considerando a combinação das colunas selecionadas. `ORDER BY` apenas organiza o resultado.
+
+## 4. Montana e menos de 1.000 acres
+
+```sql
+SELECT * FROM PRESERVE WHERE STATE = 'MT' AND ACRES < 1000;
+```
+
+## 5. Entre 1.200 e 15.000 acres, inclusive
+
+```sql
+SELECT * FROM PRESERVE WHERE ACRES >= 1200 AND ACRES <= 15000;
+```
+
+## 6. Montana, sem taxa e mais de 10.000 acres
+
+```sql
+SELECT * FROM PRESERVE
+WHERE STATE = 'MT' AND FEE = 0 AND ACRES > 10000;
+```
+
+## 7. Montana ou Massachusetts
+
+```sql
+SELECT * FROM PRESERVE WHERE STATE = 'MT' OR STATE = 'MA';
+```
+
+## 8. Montana ou menos de 1.000 acres
+
+```sql
+SELECT * FROM PRESERVE WHERE STATE = 'MT' OR ACRES < 1000;
+```
+
+## 9. Taxa diferente de zero
+
+```sql
+SELECT PNO, PNAME FROM PRESERVE WHERE FEE <> 0;
+```
+
+## 10. Taxa diferente de 3 e de 10
+
+```sql
+SELECT PNO, PNAME FROM PRESERVE WHERE FEE <> 3 AND FEE <> 10;
+```
+
+## 11. Arizona sem taxa ou menos de 100 acres
+
+```sql
+SELECT * FROM PRESERVE
+WHERE (STATE = 'AZ' AND FEE = 0) OR ACRES < 100;
+```
+
+## 12. Menos de 1.000 acres e taxa zero, ou Arizona
+
+```sql
+SELECT * FROM PRESERVE
+WHERE (ACRES < 1000 AND FEE = 0) OR STATE = 'AZ';
+```
+
+## 13. Taxa não maior que zero, ou Montana com mais de 1.000 acres
+
+```sql
+SELECT * FROM PRESERVE
+WHERE FEE <= 0 OR (STATE = 'MT' AND ACRES > 1000);
+```
+
+## 14. Todas, exceto Montana sem taxa
+
+```sql
+SELECT * FROM PRESERVE
+WHERE NOT (STATE = 'MT' AND FEE = 0);
+```
+
+## 15. Equivalência lógica
+
+Sim. As duas expressões são equivalentes pela propriedade distributiva do AND sobre o OR.
+
+## 16. Equivalência lógica
+
+Sim. As duas expressões são equivalentes pela propriedade distributiva do OR sobre o AND.
+
+## 17. Equivalência lógica
+
+A primeira e a terceira são equivalentes. A segunda não é equivalente em geral. Isso segue da Lei de De Morgan: `NOT(A AND B) = NOT A OR NOT B`.
+
+## 18. Equivalência lógica
+
+A primeira e a terceira são equivalentes. A segunda, que usa `OR`, não é equivalente. Pela Lei de De Morgan: `NOT(A OR B) = NOT A AND NOT B`.
+
+# Compilação
+
+```{r}
+Sys.setenv(TZ = "America/Sao_Paulo")
+Sys.time()
+```
