@@ -1,0 +1,103 @@
+---
+title: "Laboratório 04 - Importação de Dados Retangulares - Excel"
+author: "Ana Clara Ivanof de Oliveira"
+format: pdf
+execute:
+  echo: true
+---
+
+# Laboratório 04
+
+## Q1. Pacotes
+
+```{r}
+library(readxl)
+library(tidyverse)
+```
+
+## Q2. Caminho do arquivo e verificação
+
+```{r}
+fname <- "datasets/WDIEXCEL.xlsx"
+file.exists(fname)
+```
+
+## Q3. Planilha Country
+
+```{r}
+countries <- read_excel(fname, sheet = "Country")
+```
+
+## Q4. Cinco países
+
+```{r}
+countries <- countries %>%
+  filter(`Short Name` %in% c("Brazil", "Argentina", "Chile", "Mexico", "United States"))
+```
+
+## Q5. Planilha Data
+
+```{r}
+WDI <- read_excel(fname, sheet = "Data")
+```
+
+## Q6. Seleção das colunas
+
+```{r}
+WDI <- WDI %>%
+  select(`Country Code`, `Indicator Code`, `1960`:`2018`)
+```
+
+## Q7. Transformação para formato tidy
+
+```{r}
+WDI <- WDI %>%
+  pivot_longer(
+    cols = `1960`:`2018`,
+    names_to = "YEAR",
+    values_to = "VALUE"
+  )
+```
+
+## Q8. Formato inteiro de YEAR
+
+```{r}
+WDI <- WDI %>%
+  mutate(YEAR = as.integer(YEAR))
+
+is.integer(WDI$YEAR)
+```
+
+## Q9. Países e variáveis de interesse
+
+```{r}
+WDI <- WDI %>%
+  filter(`Country Code` %in% countries$`Country Code`) %>%
+  select(`Country Code`, `Short Name`, YEAR, `SP.DYN.CBRT.IN`)
+```
+
+## Q10. Ordenação por país e ano
+
+```{r}
+WDI <- WDI %>%
+  arrange(`Short Name`, YEAR)
+```
+
+## Q11. Gráfico de linhas
+
+```{r}
+ggplot(WDI, aes(x = YEAR, y = `SP.DYN.CBRT.IN`, color = `Short Name`)) +
+  geom_line() +
+  labs(
+    x = "YEAR",
+    y = "SP.DYN.CBRT.IN",
+    color = "País"
+  )
+```
+
+## Data e hora da compilação
+
+```{r}
+Sys.setenv(TZ = "America/Sao_Paulo")
+Sys.time()
+```
