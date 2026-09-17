@@ -1,0 +1,37 @@
+---
+title: "Laboratório 6: SQLite"
+subtitle: "ME315 - Análise de Dados II"
+author: "Ana Clara"
+date: "2026-09-22"
+format:
+  pdf:
+    toc: false
+    number-sections: true
+    colorlinks: true
+    geometry:
+      - top=20mm
+      - bottom=20mm
+      - left=18mm
+      - right=18mm
+lang: pt
+---
+
+# Introdução
+
+Este documento contém a resolução do **Laboratório 6** da disciplina **ME315 (Análise de Dados II)**. O objetivo principal é exercitar a conexão e manipulação de bancos de dados relacionais **SQLite** por meio do pacote `RSQLite` na linguagem R, utilizando comandos SQL nativos (`SELECT`, `WHERE`, `GROUP BY`, `INNER JOIN`, `HAVING`, `LIMIT`, `DISTINCT` e `GLOB`).
+
+# Atividades e Resoluções
+
+## Exercícios 1 e 2: Definição do Caminho e Conexão ao Banco de Dados
+
+Baixamos o arquivo `disco.db` e armazenamos seu caminho completo na variável `fname` com auxílio da função `file.path()`. Em seguida, conectamo-nos ao banco de dados com `dbConnect()`.
+
+```{r}
+library(RSQLite)
+
+# 1. Definir path e fname
+path <- "." # Ajuste para a pasta onde o arquivo disco.db está salvo
+fname <- file.path(path, "disco.db")
+
+# 2. Conectar ao arquivo de banco de dados
+conn <- dbConnect(SQLite(), fname)
